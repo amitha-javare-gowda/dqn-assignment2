@@ -1,0 +1,23 @@
+{
+ "greedy, normal starts": {
+  "n_states": 14000,
+  "mae_Q_vs_G": 0.2311468134143594,
+  "corr": 0.01790492461328191,
+  "frac_terminated": 0.0,
+  "mean_len": 500.0,
+  "max_Q": 20.880130767822266
+ },
+ "greedy, perturbed starts": {
+  "n_states": 71223,
+  "mae_Q_vs_G": 0.8684869696552964,
+  "corr": 0.46757367466416255,
+  "frac_terminated": 0.56,
+  "mean_len": 244.0575,
+  "max_Q": 22.276165008544922,
+  "start_state_mae": 2.9205087744137876,
+  "start_state_corr": 0.8831610802698925
+ },
+ "decisive_state_fraction": 0.19780069667372446,
+ "policy_agreement_decisive": 0.9882596685082873,
+ "ceiling_violation": true
+}

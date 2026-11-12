@@ -1,0 +1,4 @@
+full {'final_ma100': 183.02, 'best_ma100': 183.02, 'first_ep_ma100_150': 452, 'frac_maxQ_above_21': 0.0, 'max_Q_ever': 20.903539657592773}
+no_target {'final_ma100': 13.73, 'best_ma100': 23.875, 'first_ep_ma100_150': None, 'frac_maxQ_above_21': 0.9, 'max_Q_ever': 68156432.0}
+no_replay {'final_ma100': 198.15, 'best_ma100': 272.56, 'first_ep_ma100_150': 325, 'frac_maxQ_above_21': 0.0, 'max_Q_ever': 20.871946334838867}
+vanilla_mse {'final_ma100': 152.51, 'best_ma100': 206.91, 'first_ep_ma100_150': 396, 'frac_maxQ_above_21': 0.254, 'max_Q_ever': 23.166250228881836}

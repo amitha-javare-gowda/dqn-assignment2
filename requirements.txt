@@ -1,0 +1,6 @@
+torch>=2.1
+gymnasium[atari]>=1.0
+ale-py>=0.9
+numpy
+matplotlib
+reportlab

@@ -1,0 +1,1 @@
+{'corridor_max_abs_err': 3.3187866199657634e-07, 'corridor_greedy_all_right': True, 'survival_Q_correct': 20.006764221191407, 'survival_Q_buggy': 13.500821256637574, 'survival_Q_buggy_huber': 19.533267974853516, 'survival_theory': 19.999999999999982, 'buggy_theory': 12.244897959183673, 'pass': True}

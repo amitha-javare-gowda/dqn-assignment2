@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+results/**/last.pt
+results/validation/v3_runs/**/*.pt
+results/validation/v4_runs/**/*.pt
