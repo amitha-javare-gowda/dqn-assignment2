@@ -47,6 +47,10 @@ CUDA_VISIBLE_DEVICES=0 bash scripts/run_mspacman.sh
 sbatch scripts/mspacman.slurm
 ```
 
+On older GPUs such as the GTX 1080 on deepdish (compute capability 6.1), the default PyTorch
+wheel fails with "no kernel image is available". Install the CUDA 12.6 build instead:
+`pip install torch --index-url https://download.pytorch.org/whl/cu126`.
+
 This trains 5000 episodes, writes the plots, then rolls out 500 evaluation episodes.
 If the job stops (time limit, disconnect), run the same command again: it resumes from
 `results/mspacman/last.pt` (the replay buffer is refilled before learning resumes).

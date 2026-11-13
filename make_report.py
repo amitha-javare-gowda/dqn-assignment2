@@ -84,7 +84,11 @@ def build(a):
     v1, v2, v3, v4, v5, v6 = (J(f"{V}/v1_analytic.json"), J(f"{V}/v2_cartpole_values.json"),
                               J(f"{V}/v3_value_scale.json"), J(f"{V}/v4_ablations.json"),
                               J(f"{V}/v5_first_steps.json"), J(f"{V}/v6_mspacman_checks.json"))
-    ck = __import__("torch").load(f"{R}/cartpole/best.pt", map_location="cpu", weights_only=False)["extra"]
+    # the checkpoint rule in train_cartpole.py: best periodic eval, ties go to the later one
+    ck = {}
+    if cp_log and cp_log.get("eval_return"):
+        best = max(cp_log["eval_return"])
+        ck["episode"] = max(e for e, v in zip(cp_log["eval_episode"], cp_log["eval_return"]) if v == best)
     S = []
     S += [P("Assignment 2: Deep Q-Network", TITLE),
           P(f"<b>Name:</b> {a.name} &nbsp;&nbsp; <b>GitHub username:</b> {a.github_user} &nbsp;&nbsp; "
@@ -201,13 +205,31 @@ def build(a):
             "1/(1&minus;&gamma;) = 100 and in practice sits far below it (rewards are sparse and life "
             "loss cuts the bootstrap). A steady rise that then flattens indicates learning; an "
             "unbounded climb past roughly 30 to 40 would indicate divergence.")]
+    if pm_log:
+        import numpy as np
+        r = np.array(pm_log["reward"], float)
+        blocks = [r[i:i + 500].mean() for i in range(0, len(r), 500)]
+        S += [P("<b>Learning progress by 500-episode block:</b> "
+                + ", ".join(f"{b:.0f}" for b in blocks)
+                + ". The mean score increases in every block, and the last block is still the steepest "
+                "rise, so the agent had not converged after 5,000 episodes; more training would very likely "
+                "raise the score further (Section 8). Max Q grows in step with the score, as expected when "
+                "the agent survives longer and collects more clipped rewards.")]
     S += fig(f"{R}/mspacman/rewards.png",
-             "Figure 5 (ii). MsPacman episode score with the 100-episode moving average.", 6.0)
+             "Figure 5 (ii). MsPacman episode score with the 100-episode moving average (its first "
+             "points average fewer than 100 episodes, hence the brief spike at the start).", 6.0)
     S += fig(f"{R}/mspacman/eval_hist.png", "Figure 6 (iii). Histogram of 500 evaluation episodes.", 4.6)
     S += fig(f"{R}/mspacman/actions.png",
              "Figure 7 (non-standard). Share of each of the 9 actions per 50-episode window. Random "
-             "play is uniform (0.11 each); a learned policy concentrates on moves that suit the maze "
-             "and almost never uses NOOP.", 6.4)
+             "play is uniform (0.11 each).", 6.4)
+    S += [P("<b>Reading Figure 7.</b> We expected the learned policy to concentrate on a few moves and "
+            "to abandon NOOP. It did not: averaged over 500-episode blocks every action stays between "
+            "about 9% and 14% of steps (individual 50-episode windows range from about 7% to 17%), and "
+            "no action is abandoned, so the prediction was wrong. On reflection this is reasonable. In "
+            "Ms. Pac-Man, NOOP keeps her moving in her current direction, so it is a useful action, and "
+            "the maze requires all four directions (the diagonals act as turn-at-next-junction inputs). "
+            "Learning shows up in <i>when</i> each action is chosen, not in <i>which</i> actions are "
+            "used overall, which is why the score rises 5x while the action mix barely changes.")]
     S += [P("<b>Design choices for MsPacman.</b> Huber loss, a step learning-rate scheduler and a two-phase "
             "&epsilon; schedule, as suggested in the handout; Double-DQN targets to limit overestimation; "
             "reward clipping so a 200-point ghost and a 10-point pellet do not produce wildly different "
@@ -289,11 +311,12 @@ def build(a):
              "Figure 9 (non-standard). (a) Predicted Q vs realised return. (b) Q against steps remaining "
              "before the crash, with the theoretical curve (1&minus;&gamma;<sup>k</sup>)/(1&minus;&gamma;). (c) Q(right) "
              "&minus; Q(left) across pole angle and angular velocity.", 6.9)
-    S += [P("Figure 9(b) is the most informative plot in this report. The crash trajectories split "
-            "into two groups. Many follow the exact curve closely from about 40 steps out: the network "
-            "anticipates those crashes (mostly pole falls it cannot recover from). The rest stay at "
-            "about 20 until the last few steps: crashes it did not foresee, typically slow cart drift, "
-            "the same blind spot described in Section 3 and the source of the optimism in panel (a).")]
+    S += [P("Figure 9(b) is the most informative plot in this report. The exact value starts falling "
+            "about 60 steps before a crash, but most trajectories stay near 20 until the last 10 or so "
+            "steps and then drop sharply; only a minority begin falling 20 to 40 steps out. So the "
+            "network recognises imminent, unrecoverable pole falls but is blind to slower failures such "
+            "as cart drift: the same weakness described in Section 3 and the source of the optimism "
+            "(points above the diagonal) in panel (a).")]
 
     S += [P("6.3 V3: do values scale with &gamma; and reward as theory says?", H2),
           P("<font face='Courier'>python -m validation.v3_value_scale</font>. With +1 per step the plateau of "
@@ -326,8 +349,9 @@ def build(a):
             "diverge (max Q reaches about 7e7 and the agent never learns). The vanilla max target with MSE "
             "pushes max Q above 21 in about a quarter of episodes, against none for the full agent, which "
             "is the overestimation Double DQN removes. The replay-buffer prediction <b>failed</b> on "
-            "CartPole: learning only from the latest 128 transitions did as well as the full agent in "
-            "this run. Plausible reasons: the state is 4-dimensional and smooth, the target network "
+            "CartPole: learning only from the latest 128 transitions did not hurt, and in this single "
+            "seed it even learned faster (best moving average 273 against 183), though it also fell back "
+            "more sharply at the end. Plausible reasons: the state is 4-dimensional and smooth, the target network "
             "already stabilises the regression, and each transition is still reused for 128 updates, "
             "which is a small sliding-window replay. We would expect the full buffer to matter on "
             "MsPacman, where consecutive frames are far more correlated, and with more seeds; that is "

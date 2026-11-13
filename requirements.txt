@@ -3,4 +3,4 @@ gymnasium[atari]>=1.0
 ale-py>=0.9
 numpy
 matplotlib
-reportlab
+reportlab==4.2.5
